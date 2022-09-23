@@ -65,7 +65,7 @@ public class WebService {
                             } else {
                                // System.out.println("[" + threadId + "]Received: " + message);
                             }
-
+                            connection.close();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
