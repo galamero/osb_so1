@@ -6,22 +6,15 @@
 package com.demo.restful;
 
 import com.demo.bean.Persona;
+import com.demo.bean.Plataforma;
 import com.demo.queue.QueueUtil;
-import com.demo.threadWS.TestProducerThread;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import jdk.jfr.ContentType;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.jms.*;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 /**
  *
@@ -31,10 +24,10 @@ import javax.ws.rs.core.Response;
 public class WebService {
 
     @GET
-    @Path("/datosPersona")
+    @Path("/datosPlataforma")
     @Produces(MediaType.APPLICATION_JSON)
-    public Persona getDatosPersona() {
-        Persona persona = new Persona();
+    public Plataforma getDatosPersona() {
+        Plataforma plataforma = new Plataforma();
 
 
 
@@ -66,8 +59,8 @@ public class WebService {
 
                                 // mm. 21102017 codigo de conversion json a obj persona
                                 ObjectMapper mapper = new ObjectMapper();
-                                Persona objetoPersona = mapper.readValue(text, Persona.class);
-                                persona=objetoPersona;
+                                Plataforma objetoPlataforma = mapper.readValue(text, Plataforma.class);
+                                plataforma=objetoPlataforma;
 
                             } else {
                                // System.out.println("[" + threadId + "]Received: " + message);
@@ -84,54 +77,48 @@ public class WebService {
 
         //finaliza consumidor de la cola
 
-        return persona;
+        return plataforma;
 
     }
 
-    @POST
+
     @Path("/enviarDatos")
+    @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-
-    public Persona setDatosPersona(
-            Persona persona
-    ) {
-
-
-            persona.setId(1);
-            persona.setNombre("Luis Alberto");
-            persona.setEdad(47);
-
+    public Plataforma setDatosPersona(Plataforma plataforma) {
+        try {
             //inicia producer
 
-                String nombreCola = "queue.so1.demo";
-                String nombreServicio = "EjemploCola";
-                String serverLocation = "failover:(tcp://135.132.1.35:61616)?timeout=3000";
+            String nombreCola = "queue.so1.demo";
+            String nombreServicio = "EjemploCola";
+            String serverLocation = "failover:(tcp://135.132.1.35:61616)?timeout=3000";
 
-                System.out.println("variables creadas:" + nombreCola +" - " + nombreServicio + " - " + serverLocation);
+            System.out.println("variables creadas:" + nombreCola +" - " + nombreServicio + " - " + serverLocation);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String message = null;
+            message = objectMapper.writeValueAsString(plataforma);
 
-                String message = " {"
-                        + " \"id\":" + "1" + ","
-                        + " \"nombre\":\"" + "manuel" + "\","
-                        + " \"edad\":" + "2"
-                        + "}";
+            System.out.println("Mensaje : " + message);
+            try {
 
-                System.out.println("Mensaje : " + message);
-                try {
+                QueueUtil.send(nombreCola, true, true, 0, nombreServicio, message, serverLocation);
 
-                    QueueUtil.send(nombreCola, true, true, 0, nombreServicio, message, serverLocation);
+                System.out.println("Enviando mensaje....");
+                Thread.sleep(500);
 
-                    System.out.println("Enviando mensaje....");
-                    Thread.sleep(500);
+            } catch (Exception e) {
+                System.out.println("Error....");
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-                } catch (Exception e) {
-                    System.out.println("Error....");
-                    e.printStackTrace();
-                }
-            //finaliza producer
+        //finaliza producer
 
 
-        return persona;
+        return plataforma;
     }
 
 }
