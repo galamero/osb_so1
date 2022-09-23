@@ -33,8 +33,8 @@ public class WebService {
 
         //inicia consumidor de la cola
 
-                String nombreCola = "queue.so1.demo";
-                String nombreServicio = "EjemploCola_";
+                String nombreCola = "queue.so1.segundo.parcial";
+                String nombreServicio = "PrimerEntregable";
                 String serverLocation = "failover:(tcp://135.132.1.35:61616)?timeout=3000";
 
                 try {
@@ -56,7 +56,7 @@ public class WebService {
                             if (message instanceof TextMessage) {
                                 TextMessage textMessage = (TextMessage) message;
                                 String text = textMessage.getText();
-
+                                System.out.println("Result========> "+ text);
                                 // mm. 21102017 codigo de conversion json a obj persona
                                 ObjectMapper mapper = new ObjectMapper();
                                 Plataforma objetoPlataforma = mapper.readValue(text, Plataforma.class);
@@ -90,8 +90,8 @@ public class WebService {
         try {
             //inicia producer
 
-            String nombreCola = "queue.so1.demo";
-            String nombreServicio = "EjemploCola";
+            String nombreCola = "queue.so1.segundo.parcial";
+            String nombreServicio = "PrimerEntregable";
             String serverLocation = "failover:(tcp://135.132.1.35:61616)?timeout=3000";
 
             System.out.println("variables creadas:" + nombreCola +" - " + nombreServicio + " - " + serverLocation);
